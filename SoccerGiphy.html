@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Soccer Player Giphy</title>
+  <style type="text/css">
+    button,
+    div,
+    form,
+    input {
+      margin: 10px;
+    }
+    .gif {
+    max-width: 400px;
+    margin: 0 auto;
+    float: left;
+    width: 33%;
+    }
+    
+    
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Soccer Player Giphy Search</h1>
+    <!-- Rendered Buttons will get Dumped Here  -->
+    <div id="buttons-view"></div>
+
+    <form id="player-form">
+      <label for="player-input">Add a soccer player</label>
+      <input type="text" id="player-input"><br>
+
+      <!-- Button triggers new player to be added -->
+      <input id="add-player" type="submit" value="Add a soccer player">
+    </form>
+     <!-- Player's giphy will be dump here --> 
+    <div id="players-view"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+      // Initial array of soccer players
+      var Players = ["Leonel Messi", "Ronaldinho", "Cristiano Ronaldo", "Paolo Guerrero","Neymar"];
+
+      function displayPlayerGiphy(){
+      
+      var player = $(this).attr("player-name");
+
+      // displayPlayerGiphy function re-renders the HTML to display the appropriate content
+      // function displayPlayerGiphy() {
+
+        //var player = $(this).attr("player-name");
+        var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+        player  + "&api_key=dc6zaTOxFJmzC&limit=10";
+                   
+        // Creating an AJAX call for the specific soccer player button being clicked
+        $.ajax({
+          url: queryURL,
+          method: "GET"
+        }).done(function(response) {
+          console.log(response);
+          var results = response.data;
+           for (var i=0; i<results.length; i++){
+              var playerDiv = $("<div>");
+
+              var playerImage = $("<img>");
+
+              playerImage.addClass("gif");
+              //src with the giphy to be displayed
+              playerImage.attr("src", results[i].images.fixed_height.url);
+              // contains the still giphy to be used later $(".gif").on("click",function() paused image 
+              playerImage.attr("data-still", results[i].images.fixed_height_still.url);
+              // contains the still giphy to be used later $(".gif").on("click",function() play image
+              playerImage.attr("data-animate", results[i].images.fixed_height.url);
+              // data state for paused or animated giphy
+              playerImage.attr("data-state", "still");
+
+              playerDiv.append(playerImage);
+
+              $("#players-view").prepend(playerDiv);
+           
+              }
+
+              // logic to control play and pause of the giphys
+              $(".gif").on("click",function(){
+                var state = $(this).attr("data-state");
+      
+                  if (state === "still") {
+                      $(this).attr("src", $(this).attr("data-animate"));
+                      $(this).attr("data-state", "animate");
+                  } else {
+                      $(this).attr("src", $(this).attr("data-still"));
+                      $(this).attr("data-state", "still");
+                  }
+               
+              })
+        });
+      }
+   
+      function renderButtons() {
+
+        $("#buttons-view").empty();
+
+        // Looping through the array of soccer players
+        for (var i = 0; i < Players.length; i++) {
+              
+              var a = $("<button>");
+          // Adding a class of player to our button
+              a.addClass("player");
+          // Adding a data-attribute
+              a.attr("player-name", Players[i]);
+          // Providing the initial button text
+            a.text(Players[i]);
+          // Adding the button to the newplayer-view div
+          $("#buttons-view").append(a);
+        }
+      }
+      // This function handles events where a add a new player button is clicked
+      $("#add-player").on("click", function(event) {
+        event.preventDefault();
+        // This line grabs the input from the textbox
+        var Player = $("#player-input").val().trim();
+        // Adding player from the textbox to our array
+        Players.push(Player);
+        
+        renderButtons(); 
+        $("#player-input").val("");
+       });
+      // on click with class player calls displayPlayerGiphy
+      $(document).on("click",".player",displayPlayerGiphy);
+      // Calling the renderButtons function to display the initial buttons
+      renderButtons(); 
+     
+          
+
+          
+    </script>
+  </div>
+</body>
+
+</html>
